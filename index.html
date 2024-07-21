@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Device Orientation Example</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <script>
+      function setup() {
+        createCanvas(windowWidth, windowHeight);
+        let button = createButton('ジャイロスコープの許可を取得');
+        button.position(10, 10);
+        button.mousePressed(requestAccess);
+      }
+
+      function requestAccess() {
+        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+          DeviceOrientationEvent.requestPermission()
+            .then(response => {
+              if (response === 'granted') {
+                // 権限が与えられた場合、deviceorientationを有効にする
+                window.addEventListener('deviceorientation', handleOrientation);
+              } else {
+                alert('デバイスの傾き情報へのアクセスが拒否されました。');
+              }
+            })
+            .catch(console.error);
+        } else {
+          // iOS 13未満やAndroidの場合
+          window.addEventListener('deviceorientation', handleOrientation);
+        }
+      }
+
+      function handleOrientation(event) {
+        let alpha = event.alpha; // デバイスの回転（Z軸）
+        let beta = event.beta;   // デバイスの傾き（X軸）
+        let gamma = event.gamma; // デバイスの傾き（Y軸）
+
+        // 画面に描画
+        background(200);
+        textSize(32);
+        fill(0);
+        text('alpha: ' + alpha.toFixed(2), 10, 60);
+        text('beta: ' + beta.toFixed(2), 10, 100);
+        text('gamma: ' + gamma.toFixed(2), 10, 140);
+      }
+
+      function draw() {
+        // 描画はsetupで処理されるため、drawは空でも良い
+      }
+    </script>
+  </head>
+  <body>
+  </body>
+</html>
