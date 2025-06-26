@@ -1,67 +1,46 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>ver5</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <meta charset="utf-8">
+    <title>ver6</title>
     <style>
       body {
         margin: 0;
-        overflow: hidden; /* スクロールバーを非表示にする */
+        padding: 20px;
+        text-align: center;
+        font-family: sans-serif;
+        background: #f0f0f0;
       }
-      #hueSlider {
-        position: absolute;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 80%;
-        max-width: 400px;
-        z-index: 100; /* スライダーを前面に表示 */
+
+      img {
+        max-width: 80%;
+        height: auto;
+        margin-top: 30px;
+        transition: filter 0.1s linear;
+      }
+
+      input[type="range"] {
+        width: 300px;
+        margin-top: 20px;
       }
     </style>
   </head>
   <body>
-    <input type="range" id="hueSlider" min="0" max="360" value="0">
+    <h2>色相スライダーで画像の色を調整</h2>
+    <input type="range" min="0" max="360" value="0" id="hueSlider">
+    <p>Hue Rotation: <span id="hueValue">0</span>°</p>
+    <img id="colorImage" src="a.png" alt="色相画像">
 
     <script>
-      let img;
-      let hueRotate = 0;
-      let hueSlider;
+      const slider = document.getElementById('hueSlider');
+      const image = document.getElementById('colorImage');
+      const valueText = document.getElementById('hueValue');
 
-      function preload() {
-        img = loadImage('a.png'); // 同じフォルダに a.png を置いてください
-      }
-
-      function setup() {
-        createCanvas(windowWidth, windowHeight);
-        imageMode(CENTER);
-
-        hueSlider = select('#hueSlider'); // HTMLのスライダー要素を選択
-        hueSlider.input(updateHue); // スライダーが動いたらupdateHue関数を呼び出す
-        
-        // スライダーの初期値に基づいて一度描画
-        updateHue();
-      }
-
-      function updateHue() {
-        hueRotate = hueSlider.value(); // スライダーの値を取得
-        redraw(); // 手動で再描画をトリガー
-      }
-
-      function draw() {
-        background(255);
-        push();
-        translate(width / 2, height / 2);
-        
-        // drawingContext.filter で色相フィルターを適用
-        drawingContext.filter = `hue-rotate(${hueRotate}deg)`;
-        image(img, 0, 0);
-        pop();
-
-        fill(0);
-        textSize(16);
-        textAlign(CENTER, CENTER);
-        text(`Hue Rotation: ${hueRotate}°`, width / 2, height - 60);
-      }
+      slider.addEventListener('input', () => {
+        const hue = slider.value;
+        image.style.filter = `hue-rotate(${hue}deg)`;
+        valueText.textContent = hue;
+      });
     </script>
   </body>
 </html>
