@@ -1,12 +1,31 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>ver4</title>
+    <title>ver5</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden; /* スクロールバーを非表示にする */
+      }
+      #hueSlider {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80%;
+        max-width: 400px;
+        z-index: 100; /* スライダーを前面に表示 */
+      }
+    </style>
+  </head>
+  <body>
+    <input type="range" id="hueSlider" min="0" max="360" value="0">
+
     <script>
       let img;
       let hueRotate = 0;
-      let lastUpdate = 0;
+      let hueSlider;
 
       function preload() {
         img = loadImage('a.png'); // 同じフォルダに a.png を置いてください
@@ -14,53 +33,35 @@
 
       function setup() {
         createCanvas(windowWidth, windowHeight);
-        let button = createButton('ジャイロスコープの許可を取得');
-        button.position(10, 10);
-        button.mousePressed(requestAccess);
         imageMode(CENTER);
-        noLoop(); // 手動で再描画
+
+        hueSlider = select('#hueSlider'); // HTMLのスライダー要素を選択
+        hueSlider.input(updateHue); // スライダーが動いたらupdateHue関数を呼び出す
+        
+        // スライダーの初期値に基づいて一度描画
+        updateHue();
       }
 
-      function requestAccess() {
-        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-          DeviceOrientationEvent.requestPermission()
-            .then(response => {
-              if (response === 'granted') {
-                window.addEventListener('deviceorientation', handleOrientation);
-              } else {
-                alert('デバイスの傾き情報へのアクセスが拒否されました。');
-              }
-            })
-            .catch(console.error);
-        } else {
-          window.addEventListener('deviceorientation', handleOrientation);
-        }
-      }
-
-      function handleOrientation(event) {
-        let now = millis();
-        if (now - lastUpdate > 100) { // 最大10FPSに制限
-          hueRotate = event.alpha || 0;
-          redraw();
-          lastUpdate = now;
-        }
+      function updateHue() {
+        hueRotate = hueSlider.value(); // スライダーの値を取得
+        redraw(); // 手動で再描画をトリガー
       }
 
       function draw() {
         background(255);
         push();
         translate(width / 2, height / 2);
-        tint(255);
-        drawingContext.filter = `hue-rotate(${hueRotate}deg)`; // 色相フィルター
+        
+        // drawingContext.filter で色相フィルターを適用
+        drawingContext.filter = `hue-rotate(${hueRotate}deg)`;
         image(img, 0, 0);
         pop();
 
         fill(0);
         textSize(16);
-        text(`Hue Rotation (alpha): ${hueRotate.toFixed(2)}°`, 10, height - 20);
+        textAlign(CENTER, CENTER);
+        text(`Hue Rotation: ${hueRotate}°`, width / 2, height - 60);
       }
     </script>
-  </head>
-  <body>
   </body>
 </html>
