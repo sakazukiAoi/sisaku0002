@@ -2,26 +2,43 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>ver8</title>
+    <title>ver9</title>
     <style>
       body {
         margin: 0;
         background: #fff;
         text-align: center;
         font-family: sans-serif;
+        position: relative;
       }
-      img {
+
+      .image-wrapper {
+        position: relative;
+        display: inline-block;
+        margin-top: 50px;
+      }
+
+      #colorImage, #overlayImage {
+        position: absolute;
+        top: 0;
+        left: 0;
         max-width: 80%;
         height: auto;
-        margin-top: 50px;
         transition: filter 0.1s linear;
+      }
+
+      #overlayImage {
+        pointer-events: none; /* 下の画像が操作対象になるのを防止 */
       }
     </style>
   </head>
   <body>
     <button onclick="requestAccess()">ジャイロスコープの許可を取得</button>
     <br>
-    <img id="colorImage" src="a.png" alt="色相画像">
+    <div class="image-wrapper">
+      <img id="colorImage" src="a.png" alt="色相画像">
+      <img id="overlayImage" src="b.png" alt="固定画像">
+    </div>
     <p id="angleText">Hue Rotation: 0°</p>
 
     <script>
