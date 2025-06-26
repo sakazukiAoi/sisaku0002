@@ -29,11 +29,19 @@
       .gyro-button {
         position: absolute;
         top: 10px;
-        left: 10px;
+        left: 150px;
         z-index: 10;
-        padding: 10px 15px;
+        padding: 10px 250px;
+        color: aliceblue;
+        background-color: rgba(255, 255, 255, 0.226);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2);
       }
       .slider-controls {
+        writing-mode: vertical-rl;
         position: absolute;
         top: 60px;
         left: 10px;
@@ -41,7 +49,7 @@
         color: white;
       }
       .slider-controls label {
-        display: block;
+        writing-mode: vertical-rl;
         margin: 5px 0 2px;
       }
     </style>
