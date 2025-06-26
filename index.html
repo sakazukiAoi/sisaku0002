@@ -1,14 +1,23 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Device Orientation Example</title>
+    <title>Device Orientation + Hue Shift</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
     <script>
+      let img;
+      let hueRotate = 0;
+
+      function preload() {
+        img = loadImage('a.png');
+      }
+
       function setup() {
         createCanvas(windowWidth, windowHeight);
         let button = createButton('ジャイロスコープの許可を取得');
         button.position(10, 10);
         button.mousePressed(requestAccess);
+        imageMode(CENTER);
+        noLoop();
       }
 
       function requestAccess() {
@@ -16,7 +25,6 @@
           DeviceOrientationEvent.requestPermission()
             .then(response => {
               if (response === 'granted') {
-                // 権限が与えられた場合、deviceorientationを有効にする
                 window.addEventListener('deviceorientation', handleOrientation);
               } else {
                 alert('デバイスの傾き情報へのアクセスが拒否されました。');
@@ -24,27 +32,53 @@
             })
             .catch(console.error);
         } else {
-          // iOS 13未満やAndroidの場合
           window.addEventListener('deviceorientation', handleOrientation);
         }
       }
 
       function handleOrientation(event) {
-        let alpha = event.alpha; // デバイスの回転（Z軸）
-        let beta = event.beta;   // デバイスの傾き（X軸）
-        let gamma = event.gamma; // デバイスの傾き（Y軸）
-
-        // 画面に描画
-        background(200);
-        textSize(32);
-        fill(0);
-        text('alpha: ' + alpha.toFixed(2), 10, 60);
-        text('beta: ' + beta.toFixed(2), 10, 100);
-        text('gamma: ' + gamma.toFixed(2), 10, 140);
+        hueRotate = event.alpha || 0; // Z軸回転角
+        redraw();
       }
 
       function draw() {
-        // 描画はsetupで処理されるため、drawは空でも良い
+        background(255);
+        if (img) {
+          // createGraphicsで画像の色相を変更
+          let pg = createGraphics(img.width, img.height);
+          pg.image(img, 0, 0);
+          pg.loadPixels();
+
+          for (let y = 0; y < pg.height; y++) {
+            for (let x = 0; x < pg.width; x++) {
+              let i = (y * pg.width + x) * 4;
+              let r = pg.pixels[i];
+              let g = pg.pixels[i + 1];
+              let b = pg.pixels[i + 2];
+
+              // RGB→HSL変換
+              let c = color(r, g, b);
+              let h = hue(c);
+              let s = saturation(c);
+              let l = lightness(c);
+
+              h = (h + hueRotate) % 360;
+
+              // 新しい色で更新
+              let newColor = color(`hsl(${h}, ${s}%, ${l}%)`);
+              pg.pixels[i] = red(newColor);
+              pg.pixels[i + 1] = green(newColor);
+              pg.pixels[i + 2] = blue(newColor);
+              // alpha値はそのまま
+            }
+          }
+          pg.updatePixels();
+          image(pg, width / 2, height / 2);
+        }
+
+        fill(0);
+        textSize(16);
+        text('Hue Rotation (alpha): ' + hueRotate.toFixed(2) + '°', 10, height - 20);
       }
     </script>
   </head>
