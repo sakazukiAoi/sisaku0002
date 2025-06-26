@@ -2,45 +2,51 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>ver6</title>
+    <title>ver8</title>
     <style>
       body {
         margin: 0;
-        padding: 20px;
+        background: #fff;
         text-align: center;
         font-family: sans-serif;
-        background: #f0f0f0;
       }
-
       img {
         max-width: 80%;
         height: auto;
-        margin-top: 30px;
+        margin-top: 50px;
         transition: filter 0.1s linear;
-      }
-
-      input[type="range"] {
-        width: 300px;
-        margin-top: 20px;
       }
     </style>
   </head>
   <body>
-    <h2>色相スライダーで画像の色を調整</h2>
-    <input type="range" min="0" max="360" value="0" id="hueSlider">
-    <p>Hue Rotation: <span id="hueValue">0</span>°</p>
+    <button onclick="requestAccess()">ジャイロスコープの許可を取得</button>
+    <br>
     <img id="colorImage" src="a.png" alt="色相画像">
+    <p id="angleText">Hue Rotation: 0°</p>
 
     <script>
-      const slider = document.getElementById('hueSlider');
-      const image = document.getElementById('colorImage');
-      const valueText = document.getElementById('hueValue');
+      function requestAccess() {
+        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+          DeviceOrientationEvent.requestPermission()
+            .then(response => {
+              if (response === 'granted') {
+                window.addEventListener('deviceorientation', handleOrientation);
+              } else {
+                alert('デバイスの傾き情報へのアクセスが拒否されました。');
+              }
+            })
+            .catch(console.error);
+        } else {
+          window.addEventListener('deviceorientation', handleOrientation);
+        }
+      }
 
-      slider.addEventListener('input', () => {
-        const hue = slider.value;
-        image.style.filter = `hue-rotate(${hue}deg)`;
-        valueText.textContent = hue;
-      });
+      function handleOrientation(event) {
+        let alpha = event.alpha || 0;
+        const img = document.getElementById('colorImage');
+        img.style.filter = `hue-rotate(${alpha}deg)`;
+        document.getElementById('angleText').textContent = `Hue Rotation: ${alpha.toFixed(2)}°`;
+      }
     </script>
   </body>
 </html>
