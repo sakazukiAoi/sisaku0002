@@ -1,64 +1,64 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>ver.3/title>
+    <title>ver4</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
-    <script>let img;
-let hueRotate = 0;
-let lastUpdate = 0;
+    <script>
+      let img;
+      let hueRotate = 0;
+      let lastUpdate = 0;
 
-function preload() {
-  img = loadImage('a.png');
-}
+      function preload() {
+        img = loadImage('a.png'); // 同じフォルダに a.png を置いてください
+      }
 
-function setup() {
-  createCanvas(windowWidth, windowHeight);
-  let button = createButton('ジャイロスコープの許可を取得');
-  button.position(10, 10);
-  button.mousePressed(requestAccess);
-  imageMode(CENTER);
-  noLoop();
-}
+      function setup() {
+        createCanvas(windowWidth, windowHeight);
+        let button = createButton('ジャイロスコープの許可を取得');
+        button.position(10, 10);
+        button.mousePressed(requestAccess);
+        imageMode(CENTER);
+        noLoop(); // 手動で再描画
+      }
 
-function requestAccess() {
-  if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-    DeviceOrientationEvent.requestPermission()
-      .then(response => {
-        if (response === 'granted') {
-          window.addEventListener('deviceorientation', handleOrientation);
+      function requestAccess() {
+        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+          DeviceOrientationEvent.requestPermission()
+            .then(response => {
+              if (response === 'granted') {
+                window.addEventListener('deviceorientation', handleOrientation);
+              } else {
+                alert('デバイスの傾き情報へのアクセスが拒否されました。');
+              }
+            })
+            .catch(console.error);
         } else {
-          alert('デバイスの傾き情報へのアクセスが拒否されました。');
+          window.addEventListener('deviceorientation', handleOrientation);
         }
-      })
-      .catch(console.error);
-  } else {
-    window.addEventListener('deviceorientation', handleOrientation);
-  }
-}
+      }
 
-function handleOrientation(event) {
-  let now = millis();
-  if (now - lastUpdate > 100) { // 最低100ms（=10FPS）間隔に制限
-    hueRotate = event.alpha || 0;
-    redraw();
-    lastUpdate = now;
-  }
-}
+      function handleOrientation(event) {
+        let now = millis();
+        if (now - lastUpdate > 100) { // 最大10FPSに制限
+          hueRotate = event.alpha || 0;
+          redraw();
+          lastUpdate = now;
+        }
+      }
 
-function draw() {
-  background(255);
-  push();
-  translate(width / 2, height / 2);
-  tint(255);
-  drawingContext.filter = `hue-rotate(${hueRotate}deg)`;
-  image(img, 0, 0);
-  pop();
+      function draw() {
+        background(255);
+        push();
+        translate(width / 2, height / 2);
+        tint(255);
+        drawingContext.filter = `hue-rotate(${hueRotate}deg)`; // 色相フィルター
+        image(img, 0, 0);
+        pop();
 
-  fill(0);
-  textSize(16);
-  text('Hue Rotation (alpha): ' + hueRotate.toFixed(2) + '°', 10, height - 20);
-}
-
+        fill(0);
+        textSize(16);
+        text(`Hue Rotation (alpha): ${hueRotate.toFixed(2)}°`, 10, height - 20);
+      }
     </script>
   </head>
   <body>
