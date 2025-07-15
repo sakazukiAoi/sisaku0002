@@ -138,7 +138,7 @@
         // glowがtrueのオブジェクト（この場合はa.png）のglowLevelを取得
         const glowSourceObject = config.find(item => item.glow);
         if (glowSourceObject) {
-          const darkenAmount = (glowLevel - 1.0) / 0.3 * MAX_DARKEN_EFFECT;
+          const darkenAmount = (glowLevel - 1.0) / 0.11 * MAX_DARKEN_EFFECT;
           affectedBrightnessFactor = 1 - darkenAmount;
         }
 
