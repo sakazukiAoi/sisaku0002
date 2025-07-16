@@ -55,7 +55,7 @@
         margin: 5px 0 2px;
         -webkit-appearance: none;
       }
-      /* New styles for displaying gyro values */
+      /* Styles for displaying gyro values */
       .gyro-values {
         position: absolute;
         top: 10px;
@@ -80,6 +80,7 @@
     <div class="image-container" id="imageContainer"></div>
 
     <div class="gyro-values">
+      <p>Alpha: <span id="alphaValue">0</span></p>
       <p>Beta: <span id="betaValue">0</span></p>
       <p>Gamma: <span id="gammaValue">0</span></p>
     </div>
@@ -100,6 +101,7 @@
       const hueSlider = document.getElementById('hueSlider');
       const glowSlider = document.getElementById('glowSlider');
       // Get the new elements for displaying gyro values
+      const alphaValueElement = document.getElementById('alphaValue'); // 新しく追加
       const betaValueElement = document.getElementById('betaValue');
       const gammaValueElement = document.getElementById('gammaValue');
 
@@ -153,7 +155,7 @@
         }
       });
 
-      function applyEffects() { 
+      function applyEffects() {
         let affectedBrightnessFactor = 1; // 影響を受ける要素に適用される輝度係数
 
         // glowがtrueのオブジェクト（この場合はa.png）のglowLevelを取得
@@ -239,10 +241,12 @@
       function handleOrientation(event) {
         if (!useSensor) return;
 
-        let gamma = event.gamma || 0;
+        let alpha = event.alpha || 0; // Alpha値を取得
         let beta = event.beta || 0;
+        let gamma = event.gamma || 0;
 
         // Update the displayed gyroscope values
+        alphaValueElement.textContent = alpha.toFixed(2); // Alpha値を表示
         betaValueElement.textContent = beta.toFixed(2);
         gammaValueElement.textContent = gamma.toFixed(2);
 
@@ -283,6 +287,7 @@
           applyEffects();
         }
       }, 50);
+
       const orientationImages = {
         normal: 'normal.png',
         top: 'face_down.png',
@@ -301,62 +306,46 @@
       orientationImageElement.style.objectFit = 'cover';
       document.body.appendChild(orientationImageElement);
       orientationImageElement.src = orientationImages.normal; // 初期表示
-function getOrientation(beta, gamma) {
-    // Helper to check if beta is in a range that wraps around 180/-180
-    // This handles cases where "upside down" can be either positive or negative high beta values
-    const isUpsideDownish = (b) => (b >= 150 && b <= 180) || (b >= -180 && b <= -120);
 
-    // うつ伏せ (Face Down)
-    // Beta: -30 to 59, Gamma: -40 to 40
-    if (beta >= -30 && beta <= 59 && gamma >= -40 && gamma <= 40) {
-        return 'bottom'; // Naming as 'bottom' from your original code (face_up.png implies face down device)
-    }
+      function getOrientation(beta, gamma) {
+          // Helper to check if beta is in a range that wraps around 180/-180
+          const isUpsideDownish = (b) => (b >= 150 && b <= 180) || (b >= -180 && b <= -120);
 
-    // 通常の縦持ち (Normal Portrait - Screen Up, upright)
-    // Beta: 60 to 149, Gamma: -40 to 40
-    // Note: This range for beta implies tilted backwards significantly.
-    // If "normal portrait" means screen facing the user and relatively upright,
-    // Beta would typically be closer to 90 degrees (if holding phone vertically)
-    // or around 0 if flat on a table. The range 60-149 for beta is quite wide
-    // and might include states where the phone is tilted significantly away from the user.
-    // I'll implement based on your provided range, but keep this in mind.
-    if (beta >= 60 && beta <= 149 && gamma >= -40 && gamma <= 40) {
-        return 'normal';
-    }
+          // うつ伏せ (Face Down)
+          // Beta: -30 to 59, Gamma: -40 to 40
+          if (beta >= -30 && beta <= 59 && gamma >= -40 && gamma <= 40) {
+              return 'bottom'; // Naming as 'bottom' from your original code (face_up.png implies face down device)
+          }
 
-    // 上（仰向けで顔の上に持ってる - Screen Up, "upside down" relative to top/bottom axis)
-    // Beta: -180 to -120 OR 150 to 180, Gamma: -40 to 40
-    if (isUpsideDownish(beta) && gamma >= -40 && gamma <= 40) {
-        return 'top'; // Naming as 'top' from your original code (face_down.png implies face up device)
-    }
+          // 通常の縦持ち (Normal Portrait - Screen Up, upright)
+          // Beta: 60 to 149, Gamma: -40 to 40
+          if (beta >= 60 && beta <= 149 && gamma >= -40 && gamma <= 40) {
+              return 'normal';
+          }
 
-    // 左側を下に (Left Side Down)
-    // Beta: -180 to -120 OR 150 to 180
-    // Gamma: -80 to -90 OR 40 to 90
-    // The gamma ranges here seem a bit unusual: -80 to -90 is very specific,
-    // and 40 to 90 means tilted to the right, not left.
-    // If you intend for "left side down" to be when the device is significantly tilted left,
-    // gamma should be negative (e.g., -45 to -90).
-    // Let's assume you want a strong left tilt OR a strong right tilt when the device is "upside-downish".
-    if (isUpsideDownish(beta) && ((gamma >= -90 && gamma <= -80) || (gamma >= 40 && gamma <= 90))) {
-        return 'leftSide'; // This might need clarification on expected gamma
-    }
+          // 上（仰向けで顔の上に持ってる - Screen Up, "upside down" relative to top/bottom axis)
+          // Beta: -180 to -120 OR 150 to 180, Gamma: -40 to 40
+          if (isUpsideDownish(beta) && gamma >= -40 && gamma <= 40) {
+              return 'top'; // Naming as 'top' from your original code (face_down.png implies face up device)
+          }
 
-    // 右側を下に (Right Side Down)
-    // Beta: -180 to -120 OR 150 to 180
-    // Gamma: 70 to 90 OR -40 to -90
-    // Similar to left side, the gamma ranges are a bit mixed.
-    // For "right side down", gamma should typically be positive (e.g., 45 to 90).
-    // Let's assume you want a strong right tilt OR a strong left tilt when "upside-downish".
-    if (isUpsideDownish(beta) && ((gamma >= 70 && gamma <= 90) || (gamma >= -90 && gamma <= -40))) {
-        return 'rightSide'; // This might need clarification on expected gamma
-    }
+          // 左側を下に (Left Side Down)
+          // Beta: -180 to -120 OR 150 to 180
+          // Gamma: -80 to -90 OR 40 to 90
+          if (isUpsideDownish(beta) && ((gamma >= -90 && gamma <= -80) || (gamma >= 40 && gamma <= 90))) {
+              return 'leftSide';
+          }
 
-    // Default or catch-all if no specific orientation is matched
-    // This could happen if the device is in an intermediate state,
-    // or if the defined ranges don't cover all possibilities.
-    return 'normal'; // Or a new 'unknown' state if you prefer
-}
+          // 右側を下に (Right Side Down)
+          // Beta: -180 to -120 OR 150 to 180
+          // Gamma: 70 to 90 OR -40 to -90
+          if (isUpsideDownish(beta) && ((gamma >= 70 && gamma <= 90) || (gamma >= -90 && gamma <= -40))) {
+              return 'rightSide';
+          }
+
+          // Default or catch-all if no specific orientation is matched
+          return 'normal'; // Or a new 'unknown' state if you prefer
+      }
 
       let lastOrientation = null;
     </script>
